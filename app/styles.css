@@ -22,7 +22,8 @@ html, body {
   height: 100%;
   background: var(--bg);
   color: var(--fg);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  font-family: "초코쿠키", "Choco cookie", "ChocoCookie",
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -148,8 +149,9 @@ button { font-family: inherit; cursor: pointer; border: none; }
   color: #fff;
   padding: 0 22px calc(16px + var(--safe-bottom));
   gap: 0;
-  /* 샘플(에이닷 전화)의 부드러운 한글 시스템 폰트 톤을 수신화면에 명시 적용 */
-  font-family: "Apple SD Gothic Neo", "Noto Sans KR", -apple-system,
+  /* 초코쿠키체 우선(기기에 있으면 적용), 없으면 부드러운 한글 시스템 폰트로 폴백 */
+  font-family: "초코쿠키", "Choco cookie", "ChocoCookie",
+    "Apple SD Gothic Neo", "Noto Sans KR", -apple-system,
     BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
