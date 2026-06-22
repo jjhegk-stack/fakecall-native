@@ -146,7 +146,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   text-align: left;
   background: #0a0a0a;
   color: #fff;
-  padding: calc(8px + var(--safe-top)) 22px calc(16px + var(--safe-bottom));
+  padding: 0 22px calc(16px + var(--safe-bottom));
   gap: 0;
 }
 
@@ -160,40 +160,17 @@ button { font-family: inherit; cursor: pointer; border: none; }
 }
 .incall__action { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 
-/* 1) 상태바 */
-.ic-statusbar {
-  display: flex; align-items: center; justify-content: space-between;
-  font-size: .82rem; color: #e6e6e6; padding: 4px 2px 0; letter-spacing: .2px;
-}
-.ic-statusbar__left, .ic-statusbar__right { display: flex; align-items: center; gap: 7px; }
-.ic-statusbar__carrier { font-weight: 700; }
-.ic-statusbar__time { font-weight: 600; }
-.ic-statusbar__icon { font-size: .72rem; opacity: .85; }
-.ic-statusbar__net { font-weight: 600; font-size: .76rem; }
-.ic-statusbar__bars {
-  width: 16px; height: 11px; align-self: center;
-  background:
-    linear-gradient(#e6e6e6,#e6e6e6) 0 100%/3px 5px no-repeat,
-    linear-gradient(#e6e6e6,#e6e6e6) 5px 100%/3px 7px no-repeat,
-    linear-gradient(#e6e6e6,#e6e6e6) 10px 100%/3px 9px no-repeat,
-    linear-gradient(#e6e6e6,#e6e6e6) 15px 100%/3px 11px no-repeat;
-}
-.ic-statusbar__batt {
-  font-size: .76rem; font-weight: 600;
-  border: 1px solid #9a9a9e; border-radius: 4px; padding: 1px 4px; line-height: 1;
-}
-
-/* 2) 앱 라벨 + 상태 */
+/* 1) 앱 라벨 + 상태 — 기기 시스템 상태바(실제 시계) 아래로 safe-area 만큼 내림 */
 .ic-call__applabel {
-  text-align: center; color: #8e8e93; font-size: .92rem;
-  margin-top: 18px; letter-spacing: .3px;
+  text-align: center; color: #8e8e93; font-size: .88rem;
+  padding-top: calc(20px + var(--safe-top)); letter-spacing: .3px;
 }
 .ic-call__ellipsis { margin-left: 1px; }
 
-/* 3) 발신자 행(좌측 정렬) */
+/* 2) 발신자 행(좌측 정렬) */
 .ic-call__caller {
   display: flex; align-items: center; gap: 16px;
-  margin-top: 42px; padding: 0 2px;
+  margin-top: 34px; padding: 0 2px;
 }
 .ic-call__avatar {
   flex: 0 0 auto;
@@ -210,11 +187,11 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .ic-call__primary.is-number { letter-spacing: .5px; }
 .ic-call__secondary { color: #8e8e93; font-size: 1.05rem; margin-top: 6px; letter-spacing: .5px; }
 
-/* 4) 통화 이력 카드 */
+/* 3) 통화 이력 카드 */
 .ic-card {
-  margin-top: 26px;
+  margin-top: 22px;
   flex: 1 1 auto;
-  min-height: 200px;
+  min-height: 180px;
   background: rgba(28,28,30,.7);
   border-radius: 20px;
   display: flex; flex-direction: column; justify-content: space-between;
@@ -234,10 +211,10 @@ button { font-family: inherit; cursor: pointer; border: none; }
   padding: 0 14px;
 }
 
-/* 5) 하단 통화 컨트롤 */
+/* 4) 하단 통화 컨트롤 */
 .ic-controls {
   display: flex; align-items: center; justify-content: space-between;
-  margin-top: 30px; padding: 0 2px;
+  margin-top: 28px; padding: 0 2px;
 }
 .ic-controls__side { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 64px; }
 .ic-controls__center { display: flex; align-items: center; justify-content: center; }
@@ -271,11 +248,11 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .ic-arrows--right .ic-dot:nth-child(3) { opacity: .4; }
 .ic-chev { color: #2ecc71; font-size: 1.05rem; line-height: 1; }
 
-/* 6) 맨 아래 알약 */
+/* 5) 맨 아래 알약 */
 .ic-pill {
   display: flex; align-items: center; justify-content: center;
   align-self: center;
-  margin-top: 22px;
+  margin-top: 20px;
   background: #1c1c1e; border-radius: 22px; padding: 4px;
 }
 .ic-pill__item {

@@ -9,9 +9,6 @@ import { escapeHtml } from './format.js';
 // ── 손쉽게 바꿀 수 있도록 라벨/문구를 상단 상수로 분리(추후 설정 연동 여지) ──
 const APP_LABEL = '에이닷 전화';                 // 통신사/앱 라벨
 const STATUS_SUFFIX = '수신 중';                  // "<APP_LABEL> 수신 중···"
-const CARRIER = 'U⁺';                             // 상태바 좌측 통신사
-const NETWORK = '5G';                             // 상태바 네트워크 표기
-const BATTERY = '48';                             // 상태바 배터리 퍼센트(정적 장식)
 
 // 통화 이력 카드 문구(추후 설정 연동 여지로 한 곳에 모음)
 const HISTORY = {
@@ -23,9 +20,6 @@ const HISTORY = {
   avgValue: '없음',
   note: '이 번호와 통화하는 건 이번이 처음이에요.',
 };
-
-// 앱 진입 시각 스냅샷(상태바 시계용). 모듈 로드 시 1회 캡처.
-const ENTERED_AT = new Date();
 
 /** 사람 실루엣 SVG(이름이 없을 때 아바타에 표시) */
 const PERSON_SVG = `
@@ -67,11 +61,6 @@ export function renderIncoming(root, state) {
   const hasName = name.length > 0;
   const fallbackOn = state.visualFallbackOn === true;
 
-  // 상태바 시계(앱 진입 시각 스냅샷): h:mm (24h, 0패딩 없는 시)
-  const hh = ENTERED_AT.getHours();
-  const mm = String(ENTERED_AT.getMinutes()).padStart(2, '0');
-  const clock = `${hh}:${mm}`;
-
   // 아바타: 이름 있으면 첫 글자, 없으면 사람 실루엣
   const avatarInner = hasName
     ? `<span class="ic-call__initial">${escapeHtml(initialOf(primary))}</span>`
@@ -81,24 +70,10 @@ export function renderIncoming(root, state) {
     <main class="screen screen--incoming ${fallbackOn ? 'is-flashing' : ''}"
           id="incomingScreen" aria-label="전화 수신 중">
 
-      <!-- 1) 상태바 (정적 장식) -->
-      <div class="ic-statusbar" aria-hidden="true">
-        <div class="ic-statusbar__left">
-          <span class="ic-statusbar__carrier">${escapeHtml(CARRIER)}</span>
-          <span class="ic-statusbar__time">${escapeHtml(clock)}</span>
-        </div>
-        <div class="ic-statusbar__right">
-          <span class="ic-statusbar__icon">🔕</span>
-          <span class="ic-statusbar__net">${escapeHtml(NETWORK)}</span>
-          <span class="ic-statusbar__bars"></span>
-          <span class="ic-statusbar__batt">${escapeHtml(BATTERY)}</span>
-        </div>
-      </div>
-
-      <!-- 2) 앱 라벨 + 상태 -->
+      <!-- 1) 앱 라벨 + 상태 (기기 시스템 상태바 아래) -->
       <p class="ic-call__applabel">${escapeHtml(APP_LABEL)} ${escapeHtml(STATUS_SUFFIX)}<span class="ic-call__ellipsis">···</span></p>
 
-      <!-- 3) 발신자 행 (좌측 정렬) -->
+      <!-- 2) 발신자 행 (좌측 정렬) -->
       <div class="ic-call__caller">
         <div class="ic-call__avatar ${hasName ? 'has-name' : ''}">${avatarInner}</div>
         <div class="ic-call__id">
@@ -107,7 +82,7 @@ export function renderIncoming(root, state) {
         </div>
       </div>
 
-      <!-- 4) 통화 이력 카드 -->
+      <!-- 3) 통화 이력 카드 -->
       <div class="ic-card">
         <div class="ic-card__stats">
           <div class="ic-card__stat">
@@ -126,7 +101,7 @@ export function renderIncoming(root, state) {
         <p class="ic-card__note">${escapeHtml(HISTORY.note)}</p>
       </div>
 
-      <!-- 5) 하단 통화 컨트롤 -->
+      <!-- 4) 하단 통화 컨트롤 -->
       <div class="ic-controls">
         <!-- 거절(좌) -->
         <div class="ic-controls__side">
@@ -164,7 +139,7 @@ export function renderIncoming(root, state) {
         </div>
       </div>
 
-      <!-- 6) 맨 아래 알약 -->
+      <!-- 5) 맨 아래 알약 -->
       <div class="ic-pill" role="group" aria-label="추가 동작">
         <button type="button" class="ic-pill__item" id="blockBtn">수신차단</button>
         <span class="ic-pill__sep" aria-hidden="true"></span>
