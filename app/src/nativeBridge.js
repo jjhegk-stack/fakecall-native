@@ -18,6 +18,11 @@ function ln() {
   return window.Capacitor?.Plugins?.LocalNotifications;
 }
 
+/** 커스텀 FakeCall 플러그인 핸들(잠금화면 위 full-screen intent 통화). 없으면 undefined. */
+function fakeCall() {
+  return window.Capacitor?.Plugins?.FakeCall;
+}
+
 /** 권한 요청 + 高중요도 알림 채널 생성. 웹/미지원이면 no-op. try/catch. */
 export async function ensureReady() {
   const plugin = ln();
@@ -37,8 +42,23 @@ export async function ensureReady() {
   } catch (e) { /* 채널 생성 실패 흡수(iOS 등 채널 미지원 포함) */ }
 }
 
-/** 목표 시각에 OS 알림 예약. 기존 예약 취소 후 고정 id로 재예약. 웹/미지원이면 no-op. */
+/**
+ * 목표 시각에 통화 예약. FakeCall(잠금화면 위 통화)이 있으면 그것만 사용(알림 중복 방지),
+ * 없으면 기존 LocalNotifications 경로로 폴백. 웹/미지원이면 no-op.
+ */
 export async function scheduleNative(scheduledAt, caller) {
+  const fc = fakeCall();
+  if (fc) {
+    // FakeCall 우선: 정확 알람 예약 → 잠금화면 위 통화화면 자동 표시. LN은 호출하지 않음.
+    try {
+      await fc.schedule({
+        at: scheduledAt,
+        name: caller?.name || '',
+        number: caller?.number || '',
+      });
+    } catch (e) { /* FakeCall 예약 실패 흡수 */ }
+    return;
+  }
   const plugin = ln();
   if (!plugin) return;
   try {
@@ -56,13 +76,37 @@ export async function scheduleNative(scheduledAt, caller) {
   } catch (e) { /* 예약 실패 흡수 */ }
 }
 
-/** 예약된 OS 알림 취소. 웹/미지원이면 no-op. try/catch. */
+/** 예약 취소. FakeCall 있으면 그것만 취소, 없으면 LN 취소. 웹/미지원이면 no-op. try/catch. */
 export async function cancelNative() {
+  const fc = fakeCall();
+  if (fc) {
+    try {
+      await fc.cancel();
+    } catch (e) { /* FakeCall 취소 실패 흡수 */ }
+    return;
+  }
   const plugin = ln();
   if (!plugin) return;
   try {
     await plugin.cancel({ notifications: [{ id: NOTIF_ID }] });
   } catch (e) { /* 취소 실패 흡수 */ }
+}
+
+/**
+ * 앱이 FakeCall 풀스크린 알람으로 실행됐는지 확인 → 울리는 중이면 caller로 콜백.
+ * FakeCall 없으면 no-op. fire-and-forget(.catch), try/catch.
+ * @param {(caller:{name:string,number:string})=>void} cb
+ */
+export function checkLaunch(cb) {
+  const fc = fakeCall();
+  if (!fc || typeof cb !== 'function') return;
+  try {
+    Promise.resolve(fc.getLaunchData())
+      .then((d) => {
+        if (d?.ringing) cb({ name: d.name, number: d.number });
+      })
+      .catch(() => { /* 런치 데이터 조회 실패 흡수 */ });
+  } catch (e) { /* 동기 호출 실패 흡수 */ }
 }
 
 /**

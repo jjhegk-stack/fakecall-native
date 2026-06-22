@@ -48,6 +48,26 @@ jobs:
           echo "----- 주입 후 권한 목록 -----"
           grep -i 'uses-permission' "$MANIFEST" || true
 
+      - name: 풀스크린 통화 네이티브 주입 (잠금화면 자동 표시)
+        run: |
+          PKG_DIR=android/app/src/main/java/site/scopelabs/fakecall
+          mkdir -p "$PKG_DIR"
+          # 커스텀 네이티브 파일을 생성된 안드로이드 프로젝트에 복사(MainActivity 덮어씀)
+          cp native-android/MainActivity.java     "$PKG_DIR/MainActivity.java"
+          cp native-android/FakeCall.java         "$PKG_DIR/FakeCall.java"
+          cp native-android/CallAlarmReceiver.java "$PKG_DIR/CallAlarmReceiver.java"
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          # full-screen intent 권한
+          grep -q 'USE_FULL_SCREEN_INTENT' "$MANIFEST" || \
+            sed -i 's#<manifest\(.*\)>#<manifest\1>\n    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />#' "$MANIFEST"
+          # 알람 BroadcastReceiver 등록
+          grep -q 'CallAlarmReceiver' "$MANIFEST" || \
+            sed -i 's#</application>#    <receiver android:name=".CallAlarmReceiver" android:exported="false" />\n    </application>#' "$MANIFEST"
+          echo "----- 주입된 java 파일 -----"
+          ls -la "$PKG_DIR"
+          echo "----- 최종 매니페스트 -----"
+          cat "$MANIFEST"
+
       - name: 디버그 APK 빌드
         run: |
           cd android

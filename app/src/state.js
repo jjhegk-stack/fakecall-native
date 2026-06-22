@@ -223,4 +223,8 @@ export function init({ render } = {}) {
   nativeBridge.onNotificationTap((caller) => {
     enterRinging(caller);
   }).catch(() => {});
+  // FakeCall 풀스크린 알람으로 앱이 실행됐으면(getLaunchData.ringing) 즉시 ringing 진입.
+  // enterRinging은 idle/scheduled에서만 진입(ringing/incall이면 내부 가드로 무시),
+  // 빈 name/number는 String(...)로 안전 처리(빈값 표시는 뷰가 담당). fire-and-forget.
+  nativeBridge.checkLaunch((caller) => enterRinging(caller));
 }
