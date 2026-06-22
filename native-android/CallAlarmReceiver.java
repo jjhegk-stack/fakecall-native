@@ -62,5 +62,12 @@ public class CallAlarmReceiver extends BroadcastReceiver {
         .setOngoing(true);
 
     nm.notify(NOTIF_ID, b.build());
+
+    // 가장 확실한 경로: "다른 앱 위에 표시(SYSTEM_ALERT_WINDOW)" 권한이 있으면
+    // 백그라운드에서도 액티비티를 직접 띄울 수 있다 → 잠금화면 위 통화화면 즉시 표시 + 화면 점등.
+    // (권한이 없으면 위 full-screen intent 알림으로 폴백)
+    try {
+      ctx.startActivity(full);
+    } catch (Exception e) { /* 권한 없으면 알림 폴백 */ }
   }
 }

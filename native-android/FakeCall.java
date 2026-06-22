@@ -41,7 +41,10 @@ public class FakeCall extends Plugin {
     String name = call.getString("name", "");
     String number = call.getString("number", "");
     Context ctx = getContext();
-    ensureFullScreenIntentPermission(ctx);   // 안드14+ 전체화면 알림 권한 없으면 설정으로 안내(1회)
+    // 권한 안내: "다른 앱 위에 표시"(가장 확실) 우선, 그게 이미 있으면 전체화면 알림 권한 보조 안내.
+    if (ensureOverlayPermission(ctx)) {
+      ensureFullScreenIntentPermission(ctx);
+    }
     AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
     PendingIntent pi = buildPi(ctx, name, number);
     try {
@@ -51,6 +54,21 @@ public class FakeCall extends Plugin {
       am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
     }
     call.resolve();
+  }
+
+  // "다른 앱 위에 표시(SYSTEM_ALERT_WINDOW)" 권한 확인. 없으면 설정 화면을 열고 false 반환.
+  // 이 권한이 있으면 알람 시 백그라운드에서도 통화화면을 직접 띄울 수 있다(가장 확실).
+  private boolean ensureOverlayPermission(Context ctx) {
+    try {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(ctx)) {
+        Intent i = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+            Uri.parse("package:" + ctx.getPackageName()));
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        ctx.startActivity(i);
+        return false;   // 사용자가 허용 후 다시 예약하면 됨
+      }
+    } catch (Exception e) { /* 미지원/예외 흡수 → 허용된 것으로 간주 */ }
+    return true;
   }
 
   // 안드로이드 14(API34)+: full-screen intent는 기본 차단 → 권한 없으면 해당 설정 화면을 연다.
