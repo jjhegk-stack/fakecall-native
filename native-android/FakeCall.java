@@ -33,11 +33,15 @@ public class FakeCall extends Plugin {
     return PendingIntent.getBroadcast(ctx, REQ, i, flags);
   }
 
-  // schedule({ at: epochMs, name, number })
+  // schedule({ delayMs: 지금부터 지연(ms), name, number })
+  // 큰 절대시각(epoch ms)을 직접 받으면 브리지 정밀도 문제로 즉시 발화할 수 있어,
+  // 작은 '지연값'만 받고 절대시각은 여기서 디바이스 시계로 계산한다.
   @PluginMethod
   public void schedule(PluginCall call) {
-    Double atD = call.getDouble("at", 0.0);   // ms 타임스탬프(큰 정수 → Double로 수신)
-    long at = atD == null ? 0L : atD.longValue();
+    Double dD = call.getDouble("delayMs", 0.0);
+    long delayMs = dD == null ? 0L : dD.longValue();
+    if (delayMs < 0) delayMs = 0;
+    long at = System.currentTimeMillis() + delayMs;
     String name = call.getString("name", "");
     String number = call.getString("number", "");
     Context ctx = getContext();

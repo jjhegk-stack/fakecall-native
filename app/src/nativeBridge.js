@@ -50,9 +50,11 @@ export async function scheduleNative(scheduledAt, caller) {
   const fc = fakeCall();
   if (fc) {
     // FakeCall 우선: 정확 알람 예약 → 잠금화면 위 통화화면 자동 표시. LN은 호출하지 않음.
+    // 큰 절대시각(epoch ms)은 브리지에서 정밀도가 깨질 수 있어 '지연(ms)'만 넘기고
+    // 절대시각은 네이티브에서 계산한다(즉시 발화 버그 방지).
     try {
       await fc.schedule({
-        at: scheduledAt,
+        delayMs: Math.max(0, Math.round(scheduledAt - Date.now())),
         name: caller?.name || '',
         number: caller?.number || '',
       });
