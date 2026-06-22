@@ -5,7 +5,8 @@
 
 // 예약 알림 고정 id(취소/재예약 시 동일 id로 덮어쓰기·삭제).
 const NOTIF_ID = 4242;
-const CHANNEL_ID = 'fakecall_ring';
+// 채널 v2: 안드로이드는 기존 채널 id의 진동 설정을 변경 불가 → 새 id로 진동 포함 채널 재생성.
+const CHANNEL_ID = 'fakecall_ring_v2';
 
 /** Capacitor 네이티브 플랫폼(안드로이드 웹뷰)인지. 웹이면 false. */
 export function isNative() {
