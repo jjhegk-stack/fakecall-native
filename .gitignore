@@ -1,0 +1,5 @@
+# Capacitor가 CI에서 생성하는 네이티브 프로젝트 / 의존성 (커밋 불필요)
+node_modules/
+android/
+.DS_Store
+*.log

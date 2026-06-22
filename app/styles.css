@@ -1,0 +1,349 @@
+/* styles.css — 모바일 우선. 3종 뷰 + 전체화면 수신 오버레이 + 시각 폴백 점멸.
+   FAKE_CALL_SPEC §4 화면 / §5.2 시각 폴백. */
+
+:root {
+  --bg: #0b0f1a;
+  --bg-elev: #151b2b;
+  --fg: #f4f6fb;
+  --fg-dim: #aeb6c8;
+  --accent: #3a7afe;
+  --green: #2ecc71;
+  --green-dark: #1f9d57;
+  --red: #ff3b30;
+  --red-dark: #c4271f;
+  --radius: 16px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body { overflow: hidden; }
+
+#app { height: 100%; }
+
+/* 한 시점 1뷰: 각 screen이 #app을 꽉 채움 */
+.screen {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: calc(24px + var(--safe-top)) 22px calc(24px + var(--safe-bottom));
+}
+
+button { font-family: inherit; cursor: pointer; border: none; }
+
+/* ============================ 공통 버튼 ============================ */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-radius: var(--radius);
+  color: #fff;
+  transition: transform .08s ease, filter .15s ease;
+}
+.btn:active { transform: scale(.98); }
+.btn--primary { background: var(--accent); }
+.btn--danger { background: var(--red); }
+
+/* ============================ 설정 화면 ============================ */
+.screen--settings { overflow-y: auto; justify-content: flex-start; }
+
+.settings__header { text-align: center; margin-bottom: 26px; }
+.settings__logo { font-size: 2.6rem; }
+.settings__title { font-size: 1.7rem; font-weight: 800; margin-top: 6px; }
+.settings__subtitle { color: var(--fg-dim); margin-top: 4px; font-size: .92rem; }
+
+.settings__form { display: flex; flex-direction: column; gap: 18px; }
+
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field__label { font-size: .85rem; color: var(--fg-dim); font-weight: 600; }
+.field__input {
+  width: 100%;
+  background: var(--bg-elev);
+  border: 1px solid #25304a;
+  border-radius: 12px;
+  padding: 14px 14px;
+  color: var(--fg);
+  font-size: 1rem;
+}
+.field__input:focus { outline: none; border-color: var(--accent); }
+.field__input::placeholder { color: #5d6883; }
+
+.presets { display: flex; gap: 10px; }
+.preset {
+  flex: 1;
+  padding: 14px 0;
+  background: var(--bg-elev);
+  border: 1px solid #25304a;
+  border-radius: 12px;
+  color: var(--fg-dim);
+  font-size: 1rem;
+  font-weight: 700;
+  transition: all .15s ease;
+}
+.preset--active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.custom { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.custom__label { font-size: .8rem; color: var(--fg-dim); }
+.custom__inputwrap { position: relative; display: flex; align-items: center; }
+.custom__input { padding-right: 42px; }
+.custom__unit {
+  position: absolute; right: 14px; color: var(--fg-dim); font-size: .95rem;
+  pointer-events: none;
+}
+/* number 스피너 숨김(모바일 일관성) */
+.custom__input::-webkit-outer-spin-button,
+.custom__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.custom__input { -moz-appearance: textfield; appearance: textfield; }
+
+.settings__note { color: #ffb04a; font-size: .85rem; min-height: 1em; }
+
+#scheduleBtn { margin-top: 6px; }
+
+.settings__disclaimer {
+  color: #6c7691; font-size: .75rem; line-height: 1.5; text-align: center;
+  margin-top: 4px;
+}
+
+/* ============================ 카운트다운 ============================ */
+.screen--countdown { justify-content: center; align-items: center; text-align: center; }
+.countdown__inner { display: flex; flex-direction: column; align-items: center; gap: 18px; width: 100%; }
+.countdown__caption { color: var(--fg-dim); font-size: 1.15rem; line-height: 1.5; }
+.countdown__time {
+  font-size: 4.4rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
+}
+.countdown__hint { color: #6c7691; font-size: .85rem; }
+.countdown__cancel { max-width: 320px; margin-top: 14px; }
+
+/* ============================ 수신화면 (전체화면 오버레이) ============================ */
+/* LG U+ / One UI "에이닷 전화" 수신화면 모사. 검정 평면 배경, 좌측 정렬 발신자. */
+.screen--incoming {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  justify-content: flex-start;
+  align-items: stretch;
+  text-align: left;
+  background: #0a0a0a;
+  color: #fff;
+  padding: calc(8px + var(--safe-top)) 22px calc(16px + var(--safe-bottom));
+  gap: 0;
+}
+
+/* incall 뷰 호환(이 뷰에서만 쓰는 옛 아바타/액션 룰을 분리) */
+.incall__avatar {
+  width: 120px; height: 120px; border-radius: 50%;
+  background: linear-gradient(160deg, #2a3654, #1a2238);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; font-weight: 700; color: #cdd6ec;
+  box-shadow: 0 0 0 6px rgba(255,255,255,.04);
+}
+.incall__action { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+/* 1) 상태바 */
+.ic-statusbar {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: .82rem; color: #e6e6e6; padding: 4px 2px 0; letter-spacing: .2px;
+}
+.ic-statusbar__left, .ic-statusbar__right { display: flex; align-items: center; gap: 7px; }
+.ic-statusbar__carrier { font-weight: 700; }
+.ic-statusbar__time { font-weight: 600; }
+.ic-statusbar__icon { font-size: .72rem; opacity: .85; }
+.ic-statusbar__net { font-weight: 600; font-size: .76rem; }
+.ic-statusbar__bars {
+  width: 16px; height: 11px; align-self: center;
+  background:
+    linear-gradient(#e6e6e6,#e6e6e6) 0 100%/3px 5px no-repeat,
+    linear-gradient(#e6e6e6,#e6e6e6) 5px 100%/3px 7px no-repeat,
+    linear-gradient(#e6e6e6,#e6e6e6) 10px 100%/3px 9px no-repeat,
+    linear-gradient(#e6e6e6,#e6e6e6) 15px 100%/3px 11px no-repeat;
+}
+.ic-statusbar__batt {
+  font-size: .76rem; font-weight: 600;
+  border: 1px solid #9a9a9e; border-radius: 4px; padding: 1px 4px; line-height: 1;
+}
+
+/* 2) 앱 라벨 + 상태 */
+.ic-call__applabel {
+  text-align: center; color: #8e8e93; font-size: .92rem;
+  margin-top: 18px; letter-spacing: .3px;
+}
+.ic-call__ellipsis { margin-left: 1px; }
+
+/* 3) 발신자 행(좌측 정렬) */
+.ic-call__caller {
+  display: flex; align-items: center; gap: 16px;
+  margin-top: 42px; padding: 0 2px;
+}
+.ic-call__avatar {
+  flex: 0 0 auto;
+  width: 90px; height: 90px; border-radius: 50%;
+  background: #2c2c2e;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.ic-call__initial { font-size: 2.6rem; font-weight: 600; color: #e6e6e6; }
+.ic-call__id { min-width: 0; }
+.ic-call__primary {
+  font-size: 2rem; font-weight: 600; line-height: 1.2; word-break: break-all;
+}
+.ic-call__primary.is-number { letter-spacing: .5px; }
+.ic-call__secondary { color: #8e8e93; font-size: 1.05rem; margin-top: 6px; letter-spacing: .5px; }
+
+/* 4) 통화 이력 카드 */
+.ic-card {
+  margin-top: 26px;
+  flex: 1 1 auto;
+  min-height: 200px;
+  background: rgba(28,28,30,.7);
+  border-radius: 20px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 22px 8px 26px;
+}
+.ic-card__stats { display: flex; align-items: stretch; }
+.ic-card__stat {
+  flex: 1; text-align: center; padding: 0 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.ic-card__stat + .ic-card__stat { border-left: 1px solid rgba(255,255,255,.12); }
+.ic-card__stat-label { color: #8e8e93; font-size: .78rem; line-height: 1.3; }
+.ic-card__stat-value { color: #fff; font-size: 1.02rem; font-weight: 500; }
+.ic-card__stat-value--big { font-size: 1.5rem; font-weight: 700; }
+.ic-card__note {
+  text-align: center; color: #fff; font-size: .95rem; opacity: .95;
+  padding: 0 14px;
+}
+
+/* 5) 하단 통화 컨트롤 */
+.ic-controls {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 30px; padding: 0 2px;
+}
+.ic-controls__side { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 64px; }
+.ic-controls__center { display: flex; align-items: center; justify-content: center; }
+.ic-controls__label { color: #c7c7cc; font-size: .82rem; }
+
+.ic-iconbtn {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: transparent; display: flex; align-items: center; justify-content: center;
+  transition: transform .08s ease, opacity .15s ease;
+}
+.ic-iconbtn:active { transform: scale(.9); }
+.ic-iconbtn--accept { animation: ic-bob 1.4s ease-in-out infinite; }
+
+.ic-mutebtn {
+  width: 110px; height: 110px; border-radius: 50%;
+  background: #ffffff; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 24px rgba(0,0,0,.5);
+  transition: transform .08s ease, background .15s ease;
+}
+.ic-mutebtn:active { transform: scale(.94); }
+.ic-mutebtn.is-pressed { background: #d1d1d6; }
+
+/* 안쪽 향하는 초록 점/화살표 */
+.ic-arrows { display: flex; align-items: center; gap: 4px; opacity: .9; }
+.ic-arrows--left { animation: ic-flow-left 1.3s ease-in-out infinite; }
+.ic-arrows--right { animation: ic-flow-right 1.3s ease-in-out infinite; }
+.ic-dot { width: 5px; height: 5px; border-radius: 50%; background: #2ecc71; }
+.ic-arrows--left .ic-dot:nth-child(1) { opacity: .4; }
+.ic-arrows--left .ic-dot:nth-child(2) { opacity: .7; }
+.ic-arrows--right .ic-dot:nth-child(2) { opacity: .7; }
+.ic-arrows--right .ic-dot:nth-child(3) { opacity: .4; }
+.ic-chev { color: #2ecc71; font-size: 1.05rem; line-height: 1; }
+
+/* 6) 맨 아래 알약 */
+.ic-pill {
+  display: flex; align-items: center; justify-content: center;
+  align-self: center;
+  margin-top: 22px;
+  background: #1c1c1e; border-radius: 22px; padding: 4px;
+}
+.ic-pill__item {
+  background: transparent; color: #8e8e93; font-size: .9rem;
+  padding: 9px 18px; border-radius: 18px; transition: color .15s ease;
+}
+.ic-pill__item:active { color: #fff; }
+.ic-pill__sep { width: 1px; height: 16px; background: rgba(255,255,255,.18); }
+
+/* --- 시각 폴백: 진동 미지원 시 전체 점멸(SPEC §5.2) — 검정 배경에 맞춤 --- */
+.screen--incoming.is-flashing {
+  animation: ring-flash .9s steps(1, end) infinite;
+}
+@keyframes ring-flash {
+  0%, 49%   { background: #0a0a0a; }
+  50%, 100% { background: #14224d; }
+}
+
+@keyframes ic-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes ic-flow-left {
+  0%, 100% { transform: translateX(0); opacity: .9; }
+  50% { transform: translateX(-4px); opacity: .6; }
+}
+@keyframes ic-flow-right {
+  0%, 100% { transform: translateX(0); opacity: .9; }
+  50% { transform: translateX(4px); opacity: .6; }
+}
+
+/* ============================ 통화중 화면 ============================ */
+.screen--incall {
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  background: radial-gradient(120% 80% at 50% 0%, #16213a 0%, #0b0f1a 70%);
+}
+.incall__top { margin-top: 9vh; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.incall__name { font-size: 2.2rem; font-weight: 800; }
+.incall__number { color: var(--fg-dim); font-size: 1.05rem; letter-spacing: 1px; }
+.incall__elapsed {
+  font-size: 1.5rem; font-weight: 600; color: var(--green);
+  font-variant-numeric: tabular-nums; margin-top: 10px;
+}
+.incall__status { color: var(--fg-dim); font-size: .9rem; }
+.incall__actions { margin-bottom: 7vh; }
+
+/* 통화중 화면 종료 버튼(옛 .circle 룰 — incall 전용으로 유지) */
+.circle {
+  width: 74px; height: 74px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1.9rem;
+  transition: transform .08s ease, filter .15s ease;
+}
+.circle:active { transform: scale(.92); }
+.circle__icon { line-height: 1; }
+.circle__label { color: var(--fg-dim); font-size: .9rem; }
+.circle--end { background: var(--red); box-shadow: 0 8px 24px rgba(255,59,48,.4); }
+
+/* 데스크톱: 모바일 프레임처럼 가운데 정렬(연출 유지) */
+@media (min-width: 560px) {
+  #app {
+    max-width: 420px;
+    margin: 0 auto;
+    height: 100%;
+    box-shadow: 0 0 60px rgba(0,0,0,.5);
+  }
+  /* 전체화면 오버레이는 뷰포트 전체를 덮되, 데스크톱에선 앱 폭에 맞춤 */
+  .screen--incoming { max-width: 420px; left: 50%; transform: translateX(-50%); right: auto; }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "fakecall-native",
+  "version": "1.0.0",
+  "private": true,
+  "description": "페이크콜 — 가짜 전화수신 (Capacitor 안드로이드 네이티브 빌드)",
+  "scripts": {
+    "cap:add": "cap add android",
+    "cap:sync": "cap sync android",
+    "build:apk": "cd android && gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/local-notifications": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}
