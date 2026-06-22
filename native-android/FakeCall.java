@@ -47,11 +47,20 @@ public class FakeCall extends Plugin {
     }
     AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
     PendingIntent pi = buildPi(ctx, name, number);
+    // setAlarmClock: 절전(Doze)에서도 정확히 발화하는 최고 우선순위 알람. 특별권한 불필요.
+    // → "시간이 지나도 안 울리고 화면 깨우면 그제야 울림"(Doze 밀림) 문제 해결.
     try {
-      am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
-    } catch (SecurityException e) {
-      // 정확 알람 권한이 없으면 부정확 알람으로 폴백(앱 무중단)
-      am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
+      int sFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) sFlags |= PendingIntent.FLAG_IMMUTABLE;
+      PendingIntent show = PendingIntent.getActivity(ctx, 7, new Intent(ctx, MainActivity.class), sFlags);
+      am.setAlarmClock(new AlarmManager.AlarmClockInfo(at, show), pi);
+    } catch (Throwable t) {
+      // 폴백: 정확 알람 → 부정확 알람
+      try {
+        am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
+      } catch (SecurityException e) {
+        am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
+      }
     }
     call.resolve();
   }
