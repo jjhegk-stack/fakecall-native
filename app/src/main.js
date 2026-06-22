@@ -81,10 +81,11 @@ function patch(state) {
     return;
   }
   if (state.phase === 'ringing') {
-    // 진동 미지원 시각 폴백: visualFallbackOn boolean으로 점멸 클래스 토글.
+    // 진동 미지원 시각 폴백: visualFallbackOn boolean으로 신호 클래스 토글.
+    // (배경색은 불변, 상태 텍스트/발신자 영역만 은은히 opacity pulse)
     const screen = app.querySelector('#incomingScreen');
     if (screen) {
-      screen.classList.toggle('is-flashing', state.visualFallbackOn === true);
+      screen.classList.toggle('is-signaling', state.visualFallbackOn === true);
     }
     return;
   }

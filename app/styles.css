@@ -182,9 +182,9 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .ic-call__initial { font-size: 2.6rem; font-weight: 600; color: #e6e6e6; }
 .ic-call__id { min-width: 0; }
 .ic-call__primary {
-  font-size: 2rem; font-weight: 600; line-height: 1.2; word-break: break-all;
+  font-size: 1.7rem; font-weight: 600; line-height: 1.2; word-break: break-all;
 }
-.ic-call__primary.is-number { letter-spacing: .5px; }
+.ic-call__primary.is-number { font-size: 1.65rem; letter-spacing: .5px; }
 .ic-call__secondary { color: #8e8e93; font-size: 1.05rem; margin-top: 6px; letter-spacing: .5px; }
 
 /* 3) 통화 이력 카드 */
@@ -205,7 +205,8 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .ic-card__stat + .ic-card__stat { border-left: 1px solid rgba(255,255,255,.12); }
 .ic-card__stat-label { color: #8e8e93; font-size: .78rem; line-height: 1.3; }
 .ic-card__stat-value { color: #fff; font-size: 1.02rem; font-weight: 500; }
-.ic-card__stat-value--big { font-size: 1.5rem; font-weight: 700; }
+/* "0회"/"없음"/"없음" 세 값을 동일 크기로 통일 — --big 강조를 base와 같게 맞춤 */
+.ic-card__stat-value--big { font-size: 1.02rem; font-weight: 500; }
 .ic-card__note {
   text-align: center; color: #fff; font-size: .95rem; opacity: .95;
   padding: 0 14px;
@@ -262,13 +263,18 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .ic-pill__item:active { color: #fff; }
 .ic-pill__sep { width: 1px; height: 16px; background: rgba(255,255,255,.18); }
 
-/* --- 시각 폴백: 진동 미지원 시 전체 점멸(SPEC §5.2) — 검정 배경에 맞춤 --- */
-.screen--incoming.is-flashing {
-  animation: ring-flash .9s steps(1, end) infinite;
+/* --- 시각 폴백: 진동 미지원 시 "울림" 신호(SPEC §5.2) ---
+   배경색은 절대 바꾸지 않는다(항상 #0a0a0a). 대신 상태 텍스트/발신자 영역만
+   은은한 opacity pulse로 깜빡여 "수신 중"임을 알린다. */
+.screen--incoming.is-signaling .ic-call__applabel {
+  animation: ring-signal 1.1s ease-in-out infinite;
 }
-@keyframes ring-flash {
-  0%, 49%   { background: #0a0a0a; }
-  50%, 100% { background: #14224d; }
+.screen--incoming.is-signaling .ic-call__caller {
+  animation: ring-signal 1.1s ease-in-out infinite;
+}
+@keyframes ring-signal {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .45; }
 }
 
 @keyframes ic-bob {

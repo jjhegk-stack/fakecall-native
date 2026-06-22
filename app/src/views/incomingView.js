@@ -1,7 +1,8 @@
 // incomingView.js — 전체화면 수신화면(phase: ringing) — SPEC §4.3
 // 디자인: LG U+ / 삼성 One UI "에이닷 전화" 수신화면 모사(검정 평면 배경).
 // 계약: actions.reject / actions.accept 만 호출. 진동은 logic이 처리, UI는
-// state.visualFallbackOn boolean만 보고 점멸 클래스를 토글한다(진동 미지원 폴백).
+// state.visualFallbackOn boolean만 보고 신호 클래스(is-signaling)를 토글한다(진동
+// 미지원 폴백). 신호는 배경색을 바꾸지 않고 상태 텍스트/발신자 영역만 은은히 깜빡인다.
 
 import { actions } from '../state.js';
 import { escapeHtml } from './format.js';
@@ -67,7 +68,7 @@ export function renderIncoming(root, state) {
     : PERSON_SVG;
 
   root.innerHTML = `
-    <main class="screen screen--incoming ${fallbackOn ? 'is-flashing' : ''}"
+    <main class="screen screen--incoming ${fallbackOn ? 'is-signaling' : ''}"
           id="incomingScreen" aria-label="전화 수신 중">
 
       <!-- 1) 앱 라벨 + 상태 (기기 시스템 상태바 아래) -->
@@ -87,7 +88,7 @@ export function renderIncoming(root, state) {
         <div class="ic-card__stats">
           <div class="ic-card__stat">
             <div class="ic-card__stat-label">${escapeHtml(HISTORY.recentLabel)}</div>
-            <div class="ic-card__stat-value ic-card__stat-value--big">${escapeHtml(HISTORY.recentValue)}</div>
+            <div class="ic-card__stat-value">${escapeHtml(HISTORY.recentValue)}</div>
           </div>
           <div class="ic-card__stat">
             <div class="ic-card__stat-label">${escapeHtml(HISTORY.lastLabel)}</div>
@@ -164,7 +165,7 @@ export function renderIncoming(root, state) {
   });
 
   // 중앙 음소거 버튼: 벨소리 무음 연출.
-  // 계약을 깨지 않기 위해 UI 로컬로만 시각 폴백 점멸 클래스(is-flashing)를 제거해
+  // 계약을 깨지 않기 위해 UI 로컬로만 시각 폴백 신호 클래스(is-signaling)를 제거해
   // "조용히" 시키고 눌림 피드백을 준다. (진동 실제 정지는 미연동)
   // TODO: 추후 vibration silence 액션이 계약에 추가되면 여기서 연동.
   const muteBtn = root.querySelector('#muteBtn');
@@ -172,7 +173,7 @@ export function renderIncoming(root, state) {
   muteBtn.addEventListener('click', () => {
     muteBtn.classList.add('is-pressed');
     muteBtn.setAttribute('aria-pressed', 'true');
-    screen.classList.remove('is-flashing'); // 시각 폴백 점멸 정지(로컬)
+    screen.classList.remove('is-signaling'); // 시각 폴백 신호 정지(로컬)
   });
 }
 
