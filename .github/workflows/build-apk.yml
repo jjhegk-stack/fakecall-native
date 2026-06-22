@@ -64,6 +64,9 @@ jobs:
           # 화면 강제 점등(WAKE_LOCK)
           grep -q 'android.permission.WAKE_LOCK' "$MANIFEST" || \
             sed -i 's#<manifest\(.*\)>#<manifest\1>\n    <uses-permission android:name="android.permission.WAKE_LOCK" />#' "$MANIFEST"
+          # 연속 진동(VIBRATE)
+          grep -q 'android.permission.VIBRATE' "$MANIFEST" || \
+            sed -i 's#<manifest\(.*\)>#<manifest\1>\n    <uses-permission android:name="android.permission.VIBRATE" />#' "$MANIFEST"
           # 다른 앱 위에 표시(백그라운드에서 통화화면 직접 띄우기) — 가장 확실한 경로
           grep -q 'SYSTEM_ALERT_WINDOW' "$MANIFEST" || \
             sed -i 's#<manifest\(.*\)>#<manifest\1>\n    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />#' "$MANIFEST"

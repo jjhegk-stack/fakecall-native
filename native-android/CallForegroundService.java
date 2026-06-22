@@ -9,8 +9,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.os.VibratorManager;
 
 import androidx.core.app.NotificationCompat;
 
@@ -20,6 +25,13 @@ public class CallForegroundService extends Service {
 
   private static final String CHANNEL_ID = "fakecall_fullscreen";
   private static final int NOTIF_ID = 4242;
+  private static final long RING_TIMEOUT_MS = 60000L;   // 60초 후 자동 종료(무응답)
+
+  private Vibrator vibrator;
+  private final Handler handler = new Handler(Looper.getMainLooper());
+  private final Runnable autoStop = new Runnable() {
+    @Override public void run() { stopSelf(); }
+  };
 
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
@@ -45,6 +57,10 @@ public class CallForegroundService extends Service {
       stopSelf();
       return START_NOT_STICKY;
     }
+
+    // 실제 전화처럼 연속 진동(화면 꺼져 있어도 계속). 60초 무응답 시 자동 종료.
+    startVibration();
+    handler.postDelayed(autoStop, RING_TIMEOUT_MS);
 
     // 화면 강제 점등
     try {
@@ -102,6 +118,32 @@ public class CallForegroundService extends Service {
         .setOngoing(true)
         .setAutoCancel(true)
         .build();
+  }
+
+  // 시스템 진동기를 반복 패턴으로 돌려 '계속 울리는' 연출(화면 꺼져 있어도 동작)
+  private void startVibration() {
+    try {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        VibratorManager vm = (VibratorManager) getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
+        vibrator = vm != null ? vm.getDefaultVibrator() : null;
+      } else {
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+      }
+      if (vibrator == null) return;
+      long[] pattern = {0, 700, 800};   // 진동 0.7s / 정지 0.8s 반복
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0));   // repeat=0 → 무한 반복
+      } else {
+        vibrator.vibrate(pattern, 0);
+      }
+    } catch (Throwable t) { /* ignore */ }
+  }
+
+  @Override
+  public void onDestroy() {
+    handler.removeCallbacks(autoStop);
+    try { if (vibrator != null) vibrator.cancel(); } catch (Throwable t) { /* ignore */ }
+    super.onDestroy();
   }
 
   // Android 14+ shortService 타임아웃 시 안전 종료(미종료 시 크래시 방지)

@@ -102,6 +102,8 @@ public class FakeCall extends Plugin {
     Context ctx = getContext();
     AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
     am.cancel(buildPi(ctx, "", ""));   // PendingIntent 매칭은 extras 무시(요청코드/액션 기준)
+    // 울리는 중인 포그라운드 서비스(연속 진동)도 종료 — 수락/거절/취소 시 진동 멈춤
+    try { ctx.stopService(new Intent(ctx, CallForegroundService.class)); } catch (Exception e) { /* ignore */ }
     call.resolve();
   }
 
