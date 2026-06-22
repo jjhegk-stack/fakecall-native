@@ -24,7 +24,7 @@ const HISTORY = {
 
 /** 사람 실루엣 SVG(이름이 없을 때 아바타에 표시) */
 const PERSON_SVG = `
-  <svg class="ic-call__person" viewBox="0 0 24 24" width="44" height="44"
+  <svg class="ic-call__person" viewBox="0 0 24 24" width="30" height="30"
        fill="#9a9a9e" aria-hidden="true">
     <circle cx="12" cy="8" r="4"></circle>
     <path d="M4 20c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5v.5H4V20z"></path>
@@ -45,7 +45,7 @@ const PHONE_SVG = `
 
 /** 벨소리 무음(음소거) 아이콘 — 어두운 색, 중앙 흰 원 안 */
 const MUTE_SVG = `
-  <svg viewBox="0 0 24 24" width="46" height="46" fill="#1a1a1c" aria-hidden="true">
+  <svg viewBox="0 0 24 24" width="34" height="34" fill="#1a1a1c" aria-hidden="true">
     <path d="M16.5 12c0-1.8-1-3.3-2.5-4v1.6l2.5 2.4zM18.5 12c0 .6-.1 1.2-.2 1.7l1.5 1.5c.5-1 .7-2.1.7-3.2 0-3.5-2.4-6.4-5.5-7.3v2.1c2 .8 3.5 2.7 3.5 5.2zM4.3 3 3 4.3 7.7 9H3v6h4l5 5v-6.7l4.3 4.3c-.7.5-1.4.9-2.3 1.2v2.1c1.4-.3 2.7-1 3.8-1.8L19.7 21 21 19.7 4.3 3zM12 4 9.9 6.1 12 8.2V4z"></path>
   </svg>`;
 
