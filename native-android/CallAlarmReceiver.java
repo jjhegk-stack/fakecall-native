@@ -63,9 +63,10 @@ public class CallAlarmReceiver extends BroadcastReceiver {
     }
 
     Intent full = new Intent(ctx, MainActivity.class);
+    // SINGLE_TOP 제외 → 매 알람마다 액티비티 새로 생성(onCreate)시켜 화면 켜기 재발동
     full.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
         | Intent.FLAG_ACTIVITY_CLEAR_TOP
-        | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
     full.putExtra("fakecall_ringing", true);
     full.putExtra("name", name);
     full.putExtra("number", number);

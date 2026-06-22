@@ -1,5 +1,6 @@
 package site.scopelabs.fakecall;
 
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -54,6 +55,12 @@ public class MainActivity extends BridgeActivity {
           "fakecall:ring");
         wl.acquire(15000);   // 15초 후 자동 해제(누수 방지)
       }
+    } catch (Exception e) { /* ignore */ }
+
+    // 잠금화면 해제 요청(상호작용 가능하도록)
+    try {
+      KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+      if (km != null) km.requestDismissKeyguard(this, null);
     } catch (Exception e) { /* ignore */ }
   }
 }
