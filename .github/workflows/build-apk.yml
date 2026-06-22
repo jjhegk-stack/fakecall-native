@@ -60,6 +60,9 @@ jobs:
           # full-screen intent 권한
           grep -q 'USE_FULL_SCREEN_INTENT' "$MANIFEST" || \
             sed -i 's#<manifest\(.*\)>#<manifest\1>\n    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />#' "$MANIFEST"
+          # 화면 강제 점등(WAKE_LOCK)
+          grep -q 'android.permission.WAKE_LOCK' "$MANIFEST" || \
+            sed -i 's#<manifest\(.*\)>#<manifest\1>\n    <uses-permission android:name="android.permission.WAKE_LOCK" />#' "$MANIFEST"
           # 알람 BroadcastReceiver 등록
           grep -q 'CallAlarmReceiver' "$MANIFEST" || \
             sed -i 's#</application>#    <receiver android:name=".CallAlarmReceiver" android:exported="false" />\n    </application>#' "$MANIFEST"
