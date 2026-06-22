@@ -39,6 +39,15 @@ jobs:
       - name: 웹 자산 동기화
         run: npx cap sync android
 
+      - name: 정확 알람 권한 주입 (Doze에서도 정시 발화)
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          # USE_EXACT_ALARM: 안드13+ 설치 시 자동 허용 → 화면 꺼짐/Doze에서도 정확 시각 발화
+          grep -q 'USE_EXACT_ALARM' "$MANIFEST" || \
+            sed -i 's#<manifest\(.*\)>#<manifest\1>\n    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />#' "$MANIFEST"
+          echo "----- 주입 후 권한 목록 -----"
+          grep -i 'uses-permission' "$MANIFEST" || true
+
       - name: 디버그 APK 빌드
         run: |
           cd android
