@@ -1,10 +1,13 @@
 package site.scopelabs.fakecall;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -38,6 +41,7 @@ public class FakeCall extends Plugin {
     String name = call.getString("name", "");
     String number = call.getString("number", "");
     Context ctx = getContext();
+    ensureFullScreenIntentPermission(ctx);   // 안드14+ 전체화면 알림 권한 없으면 설정으로 안내(1회)
     AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
     PendingIntent pi = buildPi(ctx, name, number);
     try {
@@ -47,6 +51,23 @@ public class FakeCall extends Plugin {
       am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
     }
     call.resolve();
+  }
+
+  // 안드로이드 14(API34)+: full-screen intent는 기본 차단 → 권한 없으면 해당 설정 화면을 연다.
+  // 한 번 허용하면 canUseFullScreenIntent()가 true가 되어 다시 열지 않는다.
+  private void ensureFullScreenIntentPermission(Context ctx) {
+    try {
+      if (Build.VERSION.SDK_INT >= 34) {
+        NotificationManager nm =
+            (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (nm != null && !nm.canUseFullScreenIntent()) {
+          Intent i = new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT);
+          i.setData(Uri.parse("package:" + ctx.getPackageName()));
+          i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          ctx.startActivity(i);
+        }
+      }
+    } catch (Exception e) { /* 미지원/예외 흡수 */ }
   }
 
   @PluginMethod
