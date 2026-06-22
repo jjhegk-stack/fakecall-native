@@ -11,8 +11,9 @@ import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 
-// 알람 발화 시 full-screen intent 알림을 띄운다.
-// 잠금화면 위로 MainActivity(통화화면)를 자동 표시 + 진동.
+// 알람 발화 시: (1) 포그라운드 서비스 시작 시도(가장 강력) →
+// 실패하면 (2) full-screen intent 알림 + 액티비티 직접 실행으로 폴백.
+// 모든 위험 동작을 try/catch로 감싸 크래시·퇴보를 방지(최소한 알림은 항상 뜸).
 public class CallAlarmReceiver extends BroadcastReceiver {
 
   private static final String CHANNEL_ID = "fakecall_fullscreen";
@@ -22,6 +23,30 @@ public class CallAlarmReceiver extends BroadcastReceiver {
   public void onReceive(Context ctx, Intent intent) {
     String name = intent.getStringExtra("name");
     String number = intent.getStringExtra("number");
+
+    // (1) 포그라운드 서비스 시작 시도 — 정확 알람 예외로 백그라운드 시작이 허용될 수 있음
+    boolean fgsStarted = false;
+    try {
+      Intent svc = new Intent(ctx, CallForegroundService.class);
+      svc.putExtra("name", name);
+      svc.putExtra("number", number);
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        ctx.startForegroundService(svc);
+      } else {
+        ctx.startService(svc);
+      }
+      fgsStarted = true;
+    } catch (Throwable t) {
+      fgsStarted = false;
+    }
+
+    // (2) FGS가 안 되면 직접 알림 + 액티비티(기존 폴백 경로)
+    if (!fgsStarted) {
+      postNotificationAndLaunch(ctx, name, number);
+    }
+  }
+
+  private void postNotificationAndLaunch(Context ctx, String name, String number) {
     String title = (name != null && !name.isEmpty()) ? name
         : (number != null && !number.isEmpty()) ? number : "알 수 없음";
 
@@ -37,7 +62,6 @@ public class CallAlarmReceiver extends BroadcastReceiver {
       nm.createNotificationChannel(ch);
     }
 
-    // 통화화면(MainActivity)을 잠금화면 위로 띄울 full-screen intent
     Intent full = new Intent(ctx, MainActivity.class);
     full.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
         | Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -56,18 +80,12 @@ public class CallAlarmReceiver extends BroadcastReceiver {
         .setContentText("전화가 왔습니다 — 탭하여 받기")
         .setPriority(NotificationCompat.PRIORITY_HIGH)
         .setCategory(NotificationCompat.CATEGORY_CALL)
-        .setFullScreenIntent(fsPi, true)   // 잠금화면 위 자동 표시(핵심)
+        .setFullScreenIntent(fsPi, true)
         .setContentIntent(fsPi)
         .setAutoCancel(true)
         .setOngoing(true);
 
-    nm.notify(NOTIF_ID, b.build());
-
-    // 가장 확실한 경로: "다른 앱 위에 표시(SYSTEM_ALERT_WINDOW)" 권한이 있으면
-    // 백그라운드에서도 액티비티를 직접 띄울 수 있다 → 잠금화면 위 통화화면 즉시 표시 + 화면 점등.
-    // (권한이 없으면 위 full-screen intent 알림으로 폴백)
-    try {
-      ctx.startActivity(full);
-    } catch (Exception e) { /* 권한 없으면 알림 폴백 */ }
+    try { nm.notify(NOTIF_ID, b.build()); } catch (Throwable t) { /* ignore */ }
+    try { ctx.startActivity(full); } catch (Throwable t) { /* 알림으로 폴백 */ }
   }
 }
